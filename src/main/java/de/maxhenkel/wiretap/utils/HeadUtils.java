@@ -1,5 +1,7 @@
 package de.maxhenkel.wiretap.utils;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mojang.authlib.GameProfile;
@@ -62,7 +64,7 @@ public class HeadUtils {
         }
 
         ItemStack stack = new ItemStack(Items.PLAYER_HEAD);
-        GameProfile gameProfile = HeadUtils.getGameProfile(device.getPairUUID(), type.getInternalName(), type.getSkinURL());
+        ResolvableProfile resolvableProfile = HeadUtils.getProfile(device.getPairUUID(), type.getInternalName(), type.getSkinURL());
 
         MutableComponent nameComponent = Component.literal(type.getDisplayName()).withStyle(style -> style.withItalic(false).withColor(ChatFormatting.WHITE));
         MutableComponent loreIdComponent = Component.literal("ID: %s".formatted(device.getPairUUID().toString()))
@@ -92,19 +94,15 @@ public class HeadUtils {
 
         stack.set(DataComponents.LORE, lore);
         stack.set(DataComponents.CUSTOM_NAME, nameComponent);
-
-        ResolvableProfile resolvableProfile = new ResolvableProfile(gameProfile);
         stack.set(DataComponents.PROFILE, resolvableProfile);
-
 
         return Optional.of(stack);
     }
 
     private static final Gson gson = new GsonBuilder().registerTypeAdapter(UUID.class, new UUIDTypeAdapter()).create();
 
-    private static GameProfile getGameProfile(UUID uuid, String name, String skinUrl) {
-        GameProfile gameProfile = new GameProfile(uuid, name);
-        PropertyMap properties = gameProfile.getProperties();
+    private static ResolvableProfile getProfile(UUID uuid, String name, String skinUrl) {
+        Multimap<String, Property> properties = HashMultimap.create();
 
         List<Property> textures = new ArrayList<>();
 
@@ -117,7 +115,8 @@ public class HeadUtils {
         textures.add(new Property("textures", base64Payload));
         properties.putAll("textures", textures);
 
-        return gameProfile;
+        GameProfile gameProfile = new GameProfile(uuid, name, new PropertyMap(properties));
+        return ResolvableProfile.createResolved(gameProfile);
     }
 
     private static class MinecraftTexturesPayload {

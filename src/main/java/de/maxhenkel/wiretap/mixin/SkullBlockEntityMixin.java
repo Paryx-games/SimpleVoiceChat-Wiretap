@@ -41,7 +41,7 @@ public class SkullBlockEntityMixin extends BlockEntity implements IWiretapDevice
     public void load(ValueInput valueInput, CallbackInfo ci) {
         this.deviceData = valueInput.read(HeadUtils.NBT_DEVICE, WiretapDevice.CODEC).orElse(null);
 
-        if(this.level != null && !this.level.isClientSide) {
+        if(this.level != null && !this.level.isClientSide()) {
             WiretapManager.getInstance().onLoadHead((SkullBlockEntity) (Object) this);
         }
     }
@@ -70,7 +70,7 @@ public class SkullBlockEntityMixin extends BlockEntity implements IWiretapDevice
 
         this.deviceData = wiretapDevice.get();
 
-        if(this.wiretap$getDeviceType() != DeviceType.NON_WIRETAP && this.level != null && !this.level.isClientSide) {
+        if(this.wiretap$getDeviceType() != DeviceType.NON_WIRETAP && this.level != null && !this.level.isClientSide()) {
             WiretapManager.getInstance().onLoadHead((SkullBlockEntity) (Object) this);
         }
     }
@@ -92,7 +92,7 @@ public class SkullBlockEntityMixin extends BlockEntity implements IWiretapDevice
 
         // This is needed otherwise the first loadAdditional on world load doesn't
         // actually open the channel and register this.
-        if (oldLevel == null && newLevel != null && !newLevel.isClientSide) {
+        if (oldLevel == null && newLevel != null && !newLevel.isClientSide()) {
             WiretapManager.getInstance().onLoadHead((SkullBlockEntity) (Object) this);
         }
     }
